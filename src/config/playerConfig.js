@@ -1,7 +1,7 @@
 import attacks from './attacksConfig';
 
 export default {
-    speed: 100,
+    speed: 125,
     health: 100,
     attackInterval: 1000, // ms
     meleeRange: 100,
