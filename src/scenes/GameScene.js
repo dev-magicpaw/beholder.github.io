@@ -144,6 +144,22 @@ export default class GameScene extends Phaser.Scene {
                         const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
                         return distA - distB;
                     }).slice(0, attack.target_count).forEach(enemy => {
+                        // Spawn attack sprite directly on enemy
+                        const attackSprite = this.add.sprite(enemy.x, enemy.y, attack.projectile_sprite);
+                        attackSprite.setScale(attack.projectile_scale);
+                        attackSprite.setTint(attack.projectile_tint);
+                        attackSprite.setAlpha(attack.projectile_alpha);
+                        
+                        // Add a fade out and destroy animation
+                        this.tweens.add({
+                            targets: attackSprite,
+                            alpha: 0,
+                            duration: attack.projectile_duration_ms,
+                            onComplete: () => {
+                                attackSprite.destroy();
+                            }
+                        });
+
                         enemy.health -= attack.damage;
                         if (enemy.health <= 0) {
                             this.addExp(enemy.config.expReward);

@@ -6,6 +6,11 @@ export const attacks = [
         range: 100,
         cooldown_ms: 1000,
         target_count: 1,
+        projectile_sprite: 'star_45',
+        projectile_duration_ms: 500,
+        projectile_scale: 1,
+        projectile_tint: 0xff0000,
+        projectile_alpha: 1,
     },
     {
         name: 'single_ranged',
