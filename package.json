@@ -1,0 +1,18 @@
+{
+  "name": "beholder-game",
+  "version": "1.0.0",
+  "description": "A 2D browser game where a beholder escapes its dungeon",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html --public-url ./",
+    "deploy": "gh-pages -d dist"
+  },
+  "dependencies": {
+    "phaser": "^3.70.0"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.1.1",
+    "parcel": "^2.11.0",
+    "process": "^0.11.10"
+  }
+}
