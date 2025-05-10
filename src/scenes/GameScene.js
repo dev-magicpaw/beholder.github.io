@@ -323,12 +323,14 @@ export default class GameScene extends Phaser.Scene {
 
     createVirtualJoystick() {
         // Create joystick base
-        this.joystickBase = this.add.circle(100, this.game.config.height - 100, 50, 0x000000, 0.5);
+        this.joystickBase = this.add.circle(0, 0, 50, 0x000000, 0.5);
         this.joystickBase.setScrollFactor(0);
+        this.joystickBase.setVisible(false);
         
         // Create joystick handle
-        this.joystickHandle = this.add.circle(100, this.game.config.height - 100, 25, 0x000000, 0.8);
+        this.joystickHandle = this.add.circle(0, 0, 25, 0x000000, 0.8);
         this.joystickHandle.setScrollFactor(0);
+        this.joystickHandle.setVisible(false);
         
         // Make joystick interactive
         this.joystickBase.setInteractive();
@@ -355,6 +357,8 @@ export default class GameScene extends Phaser.Scene {
             this.joystick.base.y = pointer.y;
             this.joystick.handle.x = pointer.x;
             this.joystick.handle.y = pointer.y;
+            this.joystick.base.setVisible(true);
+            this.joystick.handle.setVisible(true);
         });
         
         this.input.on('pointermove', (pointer) => {
@@ -393,6 +397,8 @@ export default class GameScene extends Phaser.Scene {
             this.joystick.handle.y = this.joystick.base.y;
             this.joystick.vector.x = 0;
             this.joystick.vector.y = 0;
+            this.joystick.base.setVisible(false);
+            this.joystick.handle.setVisible(false);
         });
     }
 } 
