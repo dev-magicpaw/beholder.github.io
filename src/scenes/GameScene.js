@@ -14,6 +14,7 @@ export default class GameScene extends Phaser.Scene {
         this.exp = 0;
         this.expToNextLevel = upgradeConfig.expToFirstLevelUp;
         this.level = 1;
+        this.isAttacking = false;
     }
 
     create() {
@@ -42,8 +43,6 @@ export default class GameScene extends Phaser.Scene {
         this.meleeHitbox.setVisible(false);
 
         // Set up collisions
-        this.physics.add.overlap(this.meleeHitbox, this.enemies, this.onEnemyHit, null, this);
-        this.physics.add.overlap(this.projectiles, this.enemies, this.onProjectileHit, null, this);
         this.physics.add.overlap(this.enemyProjectiles, this.player, this.onPlayerGotHit, null, this);
 
         // Set up input
@@ -161,6 +160,7 @@ export default class GameScene extends Phaser.Scene {
                             }
                         });
 
+                        // Apply damage directly
                         enemy.health -= attack.damage;
                         if (enemy.health <= 0) {
                             this.addExp(enemy.config.expReward);
@@ -196,6 +196,18 @@ export default class GameScene extends Phaser.Scene {
                             Math.sin(angle) * (attack.projectile_speed || playerConfig.projectileSpeed)
                         );
                         projectile.rotation = angle;
+                        projectile.damage = attack.damage;
+
+                        // Add collision check for this projectile
+                        this.physics.add.overlap(projectile, this.enemies, (proj, enemy) => {
+                            enemy.health -= proj.damage;
+                            proj.destroy();
+                            
+                            if (enemy.health <= 0) {
+                                this.addExp(enemy.config.expReward);
+                                enemy.destroy();
+                            }
+                        }, null, this);
                     }
                 }
 
@@ -284,25 +296,6 @@ export default class GameScene extends Phaser.Scene {
             projectile.damage = enemy.damage;
 
             enemy.lastAttackTime = this.time.now;
-        }
-    }
-
-    onEnemyHit(hitbox, enemy) {
-        enemy.health -= playerConfig.baseDamage;
-        
-        if (enemy.health <= 0) {
-            this.addExp(enemy.config.expReward);
-            enemy.destroy();
-        }
-    }
-
-    onProjectileHit(projectile, enemy) {
-        enemy.health -= playerConfig.baseDamage;
-        projectile.destroy();
-        
-        if (enemy.health <= 0) {
-            this.addExp(enemy.config.expReward);
-            enemy.destroy();
         }
     }
 
