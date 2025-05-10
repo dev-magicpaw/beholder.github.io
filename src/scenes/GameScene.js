@@ -198,19 +198,49 @@ export default class GameScene extends Phaser.Scene {
                 }
 
                 if (attack.type === 'ranged') {
-                    const pointer = this.input.activePointer;
-                    const baseAngle = Phaser.Math.Angle.Between(
-                        this.player.x, this.player.y,
-                        pointer.x, pointer.y
-                    );
+                    // Get all enemies within range
+                    const nearbyEnemies = this.enemies.getChildren().filter(enemy => {
+                        const distance = Phaser.Math.Distance.Between(
+                            this.player.x, this.player.y,
+                            enemy.x, enemy.y
+                        );
+                        return distance <= attack.range;
+                    });
 
-                    // Calculate angle spread for multiple projectiles
-                    const angleSpread = Math.PI / 6; // 30 degrees spread
-                    const startAngle = baseAngle - (angleSpread * (attack.target_count - 1) / 2);
+                    // Sort enemies based on target_type
+                    let targetEnemies;
+                    switch (attack.target_type) {
+                        case 'closest':
+                            targetEnemies = nearbyEnemies.sort((a, b) => {
+                                const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
+                                const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
+                                return distA - distB;
+                            });
+                            break;
+                        case 'furthest':
+                            targetEnemies = nearbyEnemies.sort((a, b) => {
+                                const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
+                                const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
+                                return distB - distA;
+                            });
+                            break;
+                        case 'lowest_health':
+                            targetEnemies = nearbyEnemies.sort((a, b) => a.health - b.health);
+                            break;
+                        case 'highest_health':
+                            targetEnemies = nearbyEnemies.sort((a, b) => b.health - a.health);
+                            break;
+                        default:
+                            targetEnemies = nearbyEnemies;
+                    }
 
-                    // Create multiple projectiles
-                    for (let i = 0; i < attack.target_count; i++) {
-                        const angle = startAngle + (angleSpread * i);
+                    // Take only target_count enemies
+                    targetEnemies.slice(0, attack.target_count).forEach(enemy => {
+                        const angle = Phaser.Math.Angle.Between(
+                            this.player.x, this.player.y,
+                            enemy.x, enemy.y
+                        );
+
                         const projectile = this.projectiles.create(
                             this.player.x,
                             this.player.y,
@@ -236,7 +266,7 @@ export default class GameScene extends Phaser.Scene {
                                 enemy.destroy();
                             }
                         }, null, this);
-                    }
+                    });
                 }
 
                 // Update last attack time for this specific attack
