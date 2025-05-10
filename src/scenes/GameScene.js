@@ -229,7 +229,10 @@ export default class GameScene extends Phaser.Scene {
         }
 
         const enemy = this.enemies.create(x, y, enemyConfig.sprite);
-        enemy.setScale(0.3); // Set enemy sprite to half size
+        enemy.setScale(enemyConfig.sprite_scale || 0.3); // Use sprite_scale from config
+        if (enemyConfig.sprite_tint) {
+            enemy.setTint(enemyConfig.sprite_tint); // Apply tint if specified
+        }
         enemy.config = enemyConfig;
         enemy.health = enemyConfig.hitPoints;
         enemy.damage = enemyConfig.damage;

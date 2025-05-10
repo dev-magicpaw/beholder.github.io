@@ -3,6 +3,8 @@ export default {
         {
             config_id: 'enemy_goblin',
             sprite: 'zombie',
+            sprite_scale: 0.3,
+            sprite_tint: 0x000000,
             spawnRate: 0.5,
             expReward: 1,
             speed: 80,
@@ -13,7 +15,9 @@ export default {
         },
         {
             config_id: 'enemy_orc',
-            sprite: 'robot',
+            sprite: 'zombie',
+            sprite_scale: 0.4,
+            sprite_tint: 0xffaaaa,
             spawnRate: 0.1,
             expReward: 5,
             speed: 60,
@@ -25,6 +29,8 @@ export default {
         {
             config_id: 'enemy_archer',
             sprite: 'zombie_rope',
+            sprite_scale: 0.25,
+            sprite_tint: 0x000000,
             spawnRate: 0.05,
             expReward: 2,
             speed: 80,
