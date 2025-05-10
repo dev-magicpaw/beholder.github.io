@@ -22,7 +22,8 @@ export default class GameScene extends Phaser.Scene {
         this.enemyProjectiles = this.physics.add.group();
 
         // Create player
-        this.player = this.physics.add.sprite(400, 300, 'beholder');
+        this.player = this.physics.add.sprite(400, 300, 'main_character');
+        this.player.setScale(0.4);
         this.player.setCollideWorldBounds(true);
         this.player.health = playerConfig.health;
         this.player.speed = playerConfig.speed;
@@ -152,6 +153,7 @@ export default class GameScene extends Phaser.Scene {
         }
 
         const enemy = this.enemies.create(x, y, enemyConfig.sprite);
+        enemy.setScale(0.3); // Set enemy sprite to half size
         enemy.config = enemyConfig;
         enemy.health = enemyConfig.hitPoints;
         enemy.damage = enemyConfig.damage;

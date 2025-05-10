@@ -45,6 +45,7 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('projectile', 'assets/sprites/projectile.png');
         this.load.image('zombie', 'assets/sprites/toon-characters/Zombie/PNG/Poses HD/character_zombie_side.png');
         this.load.image('robot', 'assets/sprites/toon-characters/Robot/PNG/Poses HD/character_robot_side.png');
+        this.load.image('main_character', 'assets/sprites/toon-characters/Male adventurer/PNG/Poses HD/character_maleAdventurer_side.png');
     }
 
     create() {
