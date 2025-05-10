@@ -43,6 +43,9 @@ export default class GameScene extends Phaser.Scene {
         // Set up input
         this.cursors = this.input.keyboard.createCursorKeys();
         
+        // Create virtual joystick for mobile
+        this.createVirtualJoystick();
+        
         // Start enemy spawning for each enemy type
         enemyConfig.enemies.forEach(enemyType => {
             this.time.addEvent({
@@ -87,24 +90,31 @@ export default class GameScene extends Phaser.Scene {
 
     updatePlayerMovement() {
         const speed = this.player.speed;
-        const cursors = this.cursors;
-
+        
         // Reset velocity
         this.player.setVelocity(0);
-
-        // Handle movement
-        if (cursors.left.isDown) {
+        
+        // Handle keyboard input
+        if (this.cursors.left.isDown) {
             this.player.setVelocityX(-speed);
-        } else if (cursors.right.isDown) {
+        } else if (this.cursors.right.isDown) {
             this.player.setVelocityX(speed);
         }
-
-        if (cursors.up.isDown) {
+        
+        if (this.cursors.up.isDown) {
             this.player.setVelocityY(-speed);
-        } else if (cursors.down.isDown) {
+        } else if (this.cursors.down.isDown) {
             this.player.setVelocityY(speed);
         }
-
+        
+        // Handle joystick input
+        if (this.joystick.isActive) {
+            this.player.setVelocity(
+                this.joystick.vector.x * speed,
+                this.joystick.vector.y * speed
+            );
+        }
+        
         // Normalize diagonal movement
         if (this.player.body.velocity.x !== 0 && this.player.body.velocity.y !== 0) {
             this.player.body.velocity.normalize().scale(speed);
@@ -307,5 +317,76 @@ export default class GameScene extends Phaser.Scene {
         }
         
         this.scene.resume();
+    }
+
+    createVirtualJoystick() {
+        // Create joystick base
+        this.joystickBase = this.add.circle(100, this.game.config.height - 100, 50, 0x000000, 0.5);
+        this.joystickBase.setScrollFactor(0);
+        
+        // Create joystick handle
+        this.joystickHandle = this.add.circle(100, this.game.config.height - 100, 25, 0x000000, 0.8);
+        this.joystickHandle.setScrollFactor(0);
+        
+        // Make joystick interactive
+        this.joystickBase.setInteractive();
+        this.joystickHandle.setInteractive();
+        
+        // Store joystick state
+        this.joystick = {
+            base: this.joystickBase,
+            handle: this.joystickHandle,
+            isActive: false,
+            vector: new Phaser.Math.Vector2(0, 0)
+        };
+        
+        // Set up joystick events
+        this.input.on('pointerdown', (pointer) => {
+            if (pointer.y > this.game.config.height - 200) { // Only activate in bottom area
+                this.joystick.isActive = true;
+                this.joystick.base.x = pointer.x;
+                this.joystick.base.y = pointer.y;
+                this.joystick.handle.x = pointer.x;
+                this.joystick.handle.y = pointer.y;
+            }
+        });
+        
+        this.input.on('pointermove', (pointer) => {
+            if (this.joystick.isActive) {
+                const distance = Phaser.Math.Distance.Between(
+                    this.joystick.base.x,
+                    this.joystick.base.y,
+                    pointer.x,
+                    pointer.y
+                );
+                
+                if (distance > 50) {
+                    const angle = Phaser.Math.Angle.Between(
+                        this.joystick.base.x,
+                        this.joystick.base.y,
+                        pointer.x,
+                        pointer.y
+                    );
+                    
+                    this.joystick.handle.x = this.joystick.base.x + Math.cos(angle) * 50;
+                    this.joystick.handle.y = this.joystick.base.y + Math.sin(angle) * 50;
+                } else {
+                    this.joystick.handle.x = pointer.x;
+                    this.joystick.handle.y = pointer.y;
+                }
+                
+                // Calculate normalized vector
+                this.joystick.vector.x = (this.joystick.handle.x - this.joystick.base.x) / 50;
+                this.joystick.vector.y = (this.joystick.handle.y - this.joystick.base.y) / 50;
+            }
+        });
+        
+        this.input.on('pointerup', () => {
+            this.joystick.isActive = false;
+            this.joystick.handle.x = this.joystick.base.x;
+            this.joystick.handle.y = this.joystick.base.y;
+            this.joystick.vector.x = 0;
+            this.joystick.vector.y = 0;
+        });
     }
 } 
