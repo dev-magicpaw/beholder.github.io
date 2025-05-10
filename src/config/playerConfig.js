@@ -1,3 +1,5 @@
+import attacks from './attacksConfig';
+
 export default {
     speed: 100,
     health: 100,
@@ -7,5 +9,5 @@ export default {
     baseDamage: 10,
     regenRate: 0, // HP per second
     expBoost: 1.0,
-    attacks: ['melee'] // Available attack types
+    attacks: attacks.filter(attack => attack.name === 'single_melee'), // Only melee attack by default
 }; 

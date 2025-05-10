@@ -9,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
         this.enemies = null;
         this.projectiles = null;
         this.enemyProjectiles = null;
-        this.lastAttackTime = 0;
+        this.lastAttackTimes = {}; // Track last attack time for each attack
         this.exp = 0;
         this.expToNextLevel = upgradeConfig.expToFirstLevelUp;
         this.level = 1;
@@ -29,6 +29,10 @@ export default class GameScene extends Phaser.Scene {
         this.player.maxHealth = playerConfig.health;
         this.player.speed = playerConfig.speed;
         this.player.attacks = [...playerConfig.attacks];
+        // Initialize last attack times for each attack
+        this.player.attacks.forEach(attack => {
+            this.lastAttackTimes[attack.name] = 0;
+        });
 
         // Create melee hitbox with physics
         this.meleeHitbox = this.add.circle(0, 0, playerConfig.meleeRange, 0xff0000, 0.3);
@@ -70,10 +74,7 @@ export default class GameScene extends Phaser.Scene {
         this.meleeHitbox.y = this.player.y;
 
         // Handle attacks
-        if (time > this.lastAttackTime + playerConfig.attackInterval) {
-            this.handleAttacks();
-            this.lastAttackTime = time;
-        }
+        this.handleAttacks(time);
 
         // Update enemies
         this.enemies.getChildren().forEach(enemy => {
@@ -122,35 +123,45 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
-    handleAttacks() {
-        if (this.player.attacks.includes('melee')) {
-            this.meleeHitbox.setVisible(true);
-            this.meleeHitbox.body.enable = true; // Enable physics body
-            this.time.delayedCall(100, () => {
-                this.meleeHitbox.setVisible(false);
-                this.meleeHitbox.body.enable = false; // Disable physics body
-            });
-        }
+    handleAttacks(time) {
+        this.player.attacks.forEach(attack => {
+            // Check if attack is off cooldown
+            if (time > this.lastAttackTimes[attack.name] + attack.cooldown_ms) {
+                if (attack.type === 'melee') {
+                    this.meleeHitbox.setVisible(true);
+                    this.meleeHitbox.body.enable = true; // Enable physics body
+                    this.time.delayedCall(100, () => {
+                        this.meleeHitbox.setVisible(false);
+                        this.meleeHitbox.body.enable = false; // Disable physics body
+                    });
+                }
 
-        if (this.player.attacks.includes('ranged')) {
-            const pointer = this.input.activePointer;
-            const angle = Phaser.Math.Angle.Between(
-                this.player.x, this.player.y,
-                pointer.x, pointer.y
-            );
+                if (attack.type === 'ranged') {
+                    const pointer = this.input.activePointer;
+                    const angle = Phaser.Math.Angle.Between(
+                        this.player.x, this.player.y,
+                        pointer.x, pointer.y
+                    );
 
-            const projectile = this.projectiles.create(
-                this.player.x,
-                this.player.y,
-                'projectile'
-            );
-            projectile.setScale(0.1); // Scale down player projectiles
-            projectile.setVelocity(
-                Math.cos(angle) * playerConfig.projectileSpeed,
-                Math.sin(angle) * playerConfig.projectileSpeed
-            );
-            projectile.rotation = angle;
-        }
+                    const projectile = this.projectiles.create(
+                        this.player.x,
+                        this.player.y,
+                        attack.projectile_sprite || 'projectile'
+                    );
+                    projectile.setScale(attack.projectile_scale || 0.1);
+                    projectile.setTint(attack.projectile_tint || 0xffffff);
+                    projectile.setAlpha(attack.projectile_alpha || 1);
+                    projectile.setVelocity(
+                        Math.cos(angle) * (attack.projectile_speed || playerConfig.projectileSpeed),
+                        Math.sin(angle) * (attack.projectile_speed || playerConfig.projectileSpeed)
+                    );
+                    projectile.rotation = angle;
+                }
+
+                // Update last attack time for this specific attack
+                this.lastAttackTimes[attack.name] = time;
+            }
+        });
     }
 
     spawnEnemy(enemyConfig) {
