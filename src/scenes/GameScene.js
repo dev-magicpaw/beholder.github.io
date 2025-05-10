@@ -37,9 +37,9 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // Create melee hitbox with physics
-        this.meleeHitbox = this.add.circle(0, 0, playerConfig.meleeRange, 0xff0000, 0.3);
+        this.meleeHitbox = this.add.circle(0, 0, this.player.attacks[0].range, 0xff0000, 0.3);
         this.physics.add.existing(this.meleeHitbox, false); // Add physics body
-        this.meleeHitbox.body.setCircle(playerConfig.meleeRange);
+        this.meleeHitbox.body.setCircle(this.player.attacks[0].range);
         this.meleeHitbox.setVisible(false);
 
         // Set up collisions
@@ -192,8 +192,8 @@ export default class GameScene extends Phaser.Scene {
                         projectile.setTint(attack.projectile_tint || 0xffffff);
                         projectile.setAlpha(attack.projectile_alpha || 1);
                         projectile.setVelocity(
-                            Math.cos(angle) * (attack.projectile_speed || playerConfig.projectileSpeed),
-                            Math.sin(angle) * (attack.projectile_speed || playerConfig.projectileSpeed)
+                            Math.cos(angle) * attack.projectile_speed,
+                            Math.sin(angle) * attack.projectile_speed
                         );
                         projectile.rotation = angle;
                         projectile.damage = attack.damage;

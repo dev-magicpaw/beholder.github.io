@@ -2,7 +2,7 @@ export const attacks = [
     {
         name: 'single_melee',
         type: 'melee',
-        damage: 10,
+        damage: 1,
         range: 100,
         cooldown_ms: 700,
         target_count: 1,
@@ -15,7 +15,7 @@ export const attacks = [
     {
         name: 'single_ranged',
         type: 'ranged',
-        damage: 10,
+        damage: 1,
         range: 300,
         cooldown_ms: 1000,
         target_count: 1,
