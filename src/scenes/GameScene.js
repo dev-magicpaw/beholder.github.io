@@ -129,34 +129,57 @@ export default class GameScene extends Phaser.Scene {
             // Check if attack is off cooldown
             if (time > this.lastAttackTimes[attack.name] + attack.cooldown_ms) {
                 if (attack.type === 'melee') {
-                    this.meleeHitbox.setVisible(true);
-                    this.meleeHitbox.body.enable = true; // Enable physics body
-                    this.time.delayedCall(100, () => {
-                        this.meleeHitbox.setVisible(false);
-                        this.meleeHitbox.body.enable = false; // Disable physics body
+                    // Get all enemies within range
+                    const nearbyEnemies = this.enemies.getChildren().filter(enemy => {
+                        const distance = Phaser.Math.Distance.Between(
+                            this.player.x, this.player.y,
+                            enemy.x, enemy.y
+                        );
+                        return distance <= attack.range;
+                    });
+
+                    // Sort by distance and take only target_count enemies
+                    nearbyEnemies.sort((a, b) => {
+                        const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
+                        const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
+                        return distA - distB;
+                    }).slice(0, attack.target_count).forEach(enemy => {
+                        enemy.health -= attack.damage;
+                        if (enemy.health <= 0) {
+                            this.addExp(enemy.config.expReward);
+                            enemy.destroy();
+                        }
                     });
                 }
 
                 if (attack.type === 'ranged') {
                     const pointer = this.input.activePointer;
-                    const angle = Phaser.Math.Angle.Between(
+                    const baseAngle = Phaser.Math.Angle.Between(
                         this.player.x, this.player.y,
                         pointer.x, pointer.y
                     );
 
-                    const projectile = this.projectiles.create(
-                        this.player.x,
-                        this.player.y,
-                        attack.projectile_sprite || 'projectile'
-                    );
-                    projectile.setScale(attack.projectile_scale || 0.1);
-                    projectile.setTint(attack.projectile_tint || 0xffffff);
-                    projectile.setAlpha(attack.projectile_alpha || 1);
-                    projectile.setVelocity(
-                        Math.cos(angle) * (attack.projectile_speed || playerConfig.projectileSpeed),
-                        Math.sin(angle) * (attack.projectile_speed || playerConfig.projectileSpeed)
-                    );
-                    projectile.rotation = angle;
+                    // Calculate angle spread for multiple projectiles
+                    const angleSpread = Math.PI / 6; // 30 degrees spread
+                    const startAngle = baseAngle - (angleSpread * (attack.target_count - 1) / 2);
+
+                    // Create multiple projectiles
+                    for (let i = 0; i < attack.target_count; i++) {
+                        const angle = startAngle + (angleSpread * i);
+                        const projectile = this.projectiles.create(
+                            this.player.x,
+                            this.player.y,
+                            attack.projectile_sprite
+                        );
+                        projectile.setScale(attack.projectile_scale || 0.1);
+                        projectile.setTint(attack.projectile_tint || 0xffffff);
+                        projectile.setAlpha(attack.projectile_alpha || 1);
+                        projectile.setVelocity(
+                            Math.cos(angle) * (attack.projectile_speed || playerConfig.projectileSpeed),
+                            Math.sin(angle) * (attack.projectile_speed || playerConfig.projectileSpeed)
+                        );
+                        projectile.rotation = angle;
+                    }
                 }
 
                 // Update last attack time for this specific attack
@@ -233,7 +256,7 @@ export default class GameScene extends Phaser.Scene {
             const projectile = this.enemyProjectiles.create(
                 enemy.x,
                 enemy.y,
-                'projectile'
+                'spheare'
             );
             projectile.setScale(0.1); // Scale down enemy projectiles
             projectile.setVelocity(

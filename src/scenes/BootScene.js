@@ -38,7 +38,8 @@ export default class BootScene extends Phaser.Scene {
         });
 
         // Load game assets
-        this.load.image('projectile', 'assets/sprites/particle-pack/PNG (Transparent)/circle_05.png');
+        this.load.image('spheare', 'assets/sprites/particle-pack/PNG (Transparent)/circle_05.png');
+        this.load.image('star_45', 'assets/sprites/particle-pack/PNG (Transparent)/star_08.png');
         this.load.image('zombie', 'assets/sprites/toon-characters/Zombie/PNG/Poses HD/character_zombie_side.png');
         this.load.image('zombie_rope', 'assets/sprites/toon-characters/Zombie/PNG/Poses HD/character_zombie_rope.png');
         this.load.image('robot', 'assets/sprites/toon-characters/Robot/PNG/Poses HD/character_robot_side.png');

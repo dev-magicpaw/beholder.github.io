@@ -5,6 +5,7 @@ export const attacks = [
         damage: 10,
         range: 100,
         cooldown_ms: 1000,
+        target_count: 1,
     },
     {
         name: 'single_ranged',
@@ -12,7 +13,8 @@ export const attacks = [
         damage: 10,
         range: 300,
         cooldown_ms: 1000,
-        projectile_sprite: 'projectile',
+        target_count: 1,
+        projectile_sprite: 'spheare',
         projectile_speed: 300,
         projectile_scale: 0.1,
         projectile_tint: 0xff0000,
