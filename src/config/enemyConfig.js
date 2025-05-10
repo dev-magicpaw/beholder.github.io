@@ -2,7 +2,7 @@ export default {
     enemies: [
         {
             config_id: 'enemy_goblin',
-            sprite: 'goblin',
+            sprite: 'zombie',
             spawnRate: 1.5,
             expReward: 1,
             speed: 80,
@@ -13,7 +13,7 @@ export default {
         },
         {
             config_id: 'enemy_orc',
-            sprite: 'orc',
+            sprite: 'robot',
             spawnRate: 1.5,
             expReward: 1,
             speed: 60,

@@ -43,11 +43,8 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('orc', 'assets/sprites/orc.png');
         this.load.image('archer', 'assets/sprites/archer.png');
         this.load.image('projectile', 'assets/sprites/projectile.png');
-        
-        // Load audio
-        this.load.audio('attack', 'assets/audio/attack.mp3');
-        this.load.audio('hit', 'assets/audio/hit.mp3');
-        this.load.audio('upgrade', 'assets/audio/upgrade.mp3');
+        this.load.image('zombie', 'assets/sprites/toon-characters/Zombie/PNG/Poses HD/character_zombie_side.png');
+        this.load.image('robot', 'assets/sprites/toon-characters/Robot/PNG/Poses HD/character_robot_side.png');
     }
 
     create() {
