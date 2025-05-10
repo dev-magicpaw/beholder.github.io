@@ -1,8 +1,8 @@
 export default {
-    speed: 200,
-    health: 150,
+    speed: 100,
+    health: 100,
     attackInterval: 1000, // ms
-    meleeRange: 200,
+    meleeRange: 100,
     projectileSpeed: 300,
     baseDamage: 10,
     regenRate: 0, // HP per second
