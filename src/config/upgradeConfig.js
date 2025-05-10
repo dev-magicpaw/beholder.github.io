@@ -9,5 +9,5 @@ export default {
     ],
     choiceCount: 3,
     expFormula: (n) => 20 * Math.pow(2, n - 1),
-    expToFirstLevelUp: 20
+    expToFirstLevelUp: 10
 }; 
