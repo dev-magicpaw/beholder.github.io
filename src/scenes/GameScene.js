@@ -28,7 +28,6 @@ export default class GameScene extends Phaser.Scene {
         this.player.speed = playerConfig.speed;
         this.player.attacks = [...playerConfig.attacks];
 
-        // Create melee hitbox
         this.meleeHitbox = this.add.circle(0, 0, playerConfig.meleeRange, 0xff0000, 0.3);
         this.meleeHitbox.setVisible(false);
 
@@ -216,18 +215,41 @@ export default class GameScene extends Phaser.Scene {
 
     onEnemyHit(hitbox, enemy) {
         enemy.health -= playerConfig.baseDamage;
+        console.log(`Enemy hit by ${playerConfig.baseDamage} damage. Enemy health: ${enemy.health}`);
+        
         if (enemy.health <= 0) {
-            this.addExp(enemy.config.expReward);
-            enemy.destroy();
+            if (enemy.anims && enemy.anims.play) {
+                enemy.anims.play('hurt');
+                // Destroy after animation completes
+                enemy.once('animationcomplete', () => {
+                    this.addExp(enemy.config.expReward);
+                    enemy.destroy();
+                });
+            } else {
+                // If no animation, destroy immediately
+                this.addExp(enemy.config.expReward);
+                enemy.destroy();
+            }
         }
     }
 
     onProjectileHit(projectile, enemy) {
         enemy.health -= playerConfig.baseDamage;
         projectile.destroy();
+        
         if (enemy.health <= 0) {
-            this.addExp(enemy.config.expReward);
-            enemy.destroy();
+            if (enemy.anims && enemy.anims.play) {
+                enemy.anims.play('hurt');
+                // Destroy after animation completes
+                enemy.once('animationcomplete', () => {
+                    this.addExp(enemy.config.expReward);
+                    enemy.destroy();
+                });
+            } else {
+                // If no animation, destroy immediately
+                this.addExp(enemy.config.expReward);
+                enemy.destroy();
+            }
         }
     }
 

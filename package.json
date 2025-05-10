@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A 2D browser game where a beholder escapes its dungeon",
   "scripts": {
-    "start": "parcel src/index.html",
+    "start": "parcel src/index.html --open --port 1234",
     "build": "parcel build src/index.html --public-url ./",
     "deploy": "gh-pages -d dist"
   },
