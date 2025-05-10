@@ -135,6 +135,7 @@ export default class GameScene extends Phaser.Scene {
                             this.player.x, this.player.y,
                             enemy.x, enemy.y
                         );
+                        
                         return distance <= attack.range;
                     });
 
