@@ -11,7 +11,7 @@ export default class GameScene extends Phaser.Scene {
         this.enemyProjectiles = null;
         this.lastAttackTime = 0;
         this.exp = 0;
-        this.expToNextLevel = upgradeConfig.expFormula(1);
+        this.expToNextLevel = upgradeConfig.expToFirstLevelUp;
         this.level = 1;
     }
 
@@ -222,7 +222,6 @@ export default class GameScene extends Phaser.Scene {
 
     onEnemyHit(hitbox, enemy) {
         enemy.health -= playerConfig.baseDamage;
-        console.log(`Enemy hit by ${playerConfig.baseDamage} damage. Enemy health: ${enemy.health}`);
         
         if (enemy.health <= 0) {
             this.addExp(enemy.config.expReward);

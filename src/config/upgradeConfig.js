@@ -8,5 +8,6 @@ export default {
         { type: 'expBoost', baseValue: 0.1 }
     ],
     choiceCount: 3,
-    expFormula: (n) => n * 2
+    expFormula: (n) => n * 2,
+    expToFirstLevelUp: 20
 }; 
