@@ -25,7 +25,7 @@ export default {
         {
             config_id: 'enemy_archer',
             sprite: 'zombie_rope',
-            spawnRate: 0.15,
+            spawnRate: 1.5,
             expReward: 2,
             speed: 60,
             hitPoints: 2,

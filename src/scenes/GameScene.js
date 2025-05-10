@@ -144,6 +144,7 @@ export default class GameScene extends Phaser.Scene {
                 this.player.y,
                 'projectile'
             );
+            projectile.setScale(0.1); // Scale down player projectiles
             projectile.setVelocity(
                 Math.cos(angle) * playerConfig.projectileSpeed,
                 Math.sin(angle) * playerConfig.projectileSpeed
@@ -222,6 +223,7 @@ export default class GameScene extends Phaser.Scene {
                 enemy.y,
                 'projectile'
             );
+            projectile.setScale(0.1); // Scale down enemy projectiles
             projectile.setVelocity(
                 Math.cos(angle) * enemy.projectileSpeed,
                 Math.sin(angle) * enemy.projectileSpeed
