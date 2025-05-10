@@ -23,6 +23,11 @@ export default class GameScene extends Phaser.Scene {
         this.projectiles = this.physics.add.group();
         this.enemyProjectiles = this.physics.add.group();
 
+        // Set world bounds for enemies
+        this.enemies.getChildren().forEach(enemy => {
+            enemy.setCollideWorldBounds(true);
+        });
+
         // Create player
         this.player = this.physics.add.sprite(400, 300, 'main_character');
         this.player.setScale(0.4);
@@ -233,6 +238,7 @@ export default class GameScene extends Phaser.Scene {
         if (enemyConfig.sprite_tint) {
             enemy.setTint(enemyConfig.sprite_tint); // Apply tint if specified
         }
+        enemy.setCollideWorldBounds(true); // Prevent enemies from walking off screen
         enemy.config = enemyConfig;
         enemy.health = enemyConfig.hitPoints;
         enemy.damage = enemyConfig.damage;
