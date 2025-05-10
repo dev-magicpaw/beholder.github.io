@@ -39,7 +39,9 @@ export default class BootScene extends Phaser.Scene {
 
         // Load game assets
         this.load.image('beholder', 'assets/sprites/beholder.png');
-        this.load.image('enemy', 'assets/sprites/enemy.png');
+        this.load.image('goblin', 'assets/sprites/goblin.png');
+        this.load.image('orc', 'assets/sprites/orc.png');
+        this.load.image('archer', 'assets/sprites/archer.png');
         this.load.image('projectile', 'assets/sprites/projectile.png');
         
         // Load audio

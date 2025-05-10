@@ -47,3 +47,7 @@ Built with:
 ## License
 
 MIT 
+
+## Credits
+
+* https://kenney.nl/assets/toon-characters-1

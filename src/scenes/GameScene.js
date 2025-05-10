@@ -35,17 +35,19 @@ export default class GameScene extends Phaser.Scene {
         // Set up collisions
         this.physics.add.overlap(this.meleeHitbox, this.enemies, this.onEnemyHit, null, this);
         this.physics.add.overlap(this.projectiles, this.enemies, this.onProjectileHit, null, this);
-        this.physics.add.overlap(this.enemyProjectiles, this.player, this.onPlayerHit, null, this);
+        this.physics.add.overlap(this.enemyProjectiles, this.player, this.onPlayerGotHit, null, this);
 
         // Set up input
         this.cursors = this.input.keyboard.createCursorKeys();
         
-        // Start enemy spawning
-        this.time.addEvent({
-            delay: 1000 / enemyConfig.spawnRate,
-            callback: this.spawnEnemy,
-            callbackScope: this,
-            loop: true
+        // Start enemy spawning for each enemy type
+        enemyConfig.enemies.forEach(enemyType => {
+            this.time.addEvent({
+                delay: 1000 / enemyType.spawnRate,
+                callback: () => this.spawnEnemy(enemyType),
+                callbackScope: this,
+                loop: true
+            });
         });
 
         // Start UI scene
@@ -132,10 +134,7 @@ export default class GameScene extends Phaser.Scene {
         }
     }
 
-    spawnEnemy() {
-        const type = Phaser.Math.RND.pick(Object.keys(enemyConfig.types));
-        const config = enemyConfig.types[type];
-        
+    spawnEnemy(enemyConfig) {
         // Spawn from random edge
         let x, y;
         if (Phaser.Math.RND.frac() < 0.5) {
@@ -146,17 +145,18 @@ export default class GameScene extends Phaser.Scene {
             y = Phaser.Math.RND.frac() < 0.5 ? -50 : this.game.config.height + 50;
         }
 
-        const enemy = this.enemies.create(x, y, 'enemy');
-        enemy.type = type;
-        enemy.health = Phaser.Math.Between(...config.hitPointsRange);
-        enemy.damage = Phaser.Math.Between(...config.damageRange);
-        enemy.speed = Phaser.Math.Between(...config.speedRange);
-        enemy.attackRate = Phaser.Math.Between(...config.attackRateRange);
+        const enemy = this.enemies.create(x, y, enemyConfig.sprite);
+        enemy.config = enemyConfig;
+        enemy.health = enemyConfig.hitPoints;
+        enemy.damage = enemyConfig.damage;
+        enemy.speed = enemyConfig.speed;
+        enemy.attackRate = enemyConfig.attackRate;
         enemy.lastAttackTime = 0;
+        enemy.attackDistance = enemyConfig.attackDistance;
 
-        if (type === 'ranged') {
-            enemy.projectileSpeed = config.projectileSpeed;
-            enemy.optimalRange = config.optimalRange;
+        if (enemyConfig.attackDistance === 'range') {
+            enemy.attackRange = enemyConfig.attackRange;
+            enemy.projectileSpeed = enemyConfig.projectileSpeed;
         }
     }
 
@@ -166,7 +166,7 @@ export default class GameScene extends Phaser.Scene {
             this.player.x, this.player.y
         );
 
-        if (enemy.type === 'ranged' && distance < enemy.optimalRange) {
+        if (enemy.attackDistance === 'range' && distance < enemy.attackRange) {
             // Move away from player
             const angle = Phaser.Math.Angle.Between(
                 this.player.x, this.player.y,
@@ -189,8 +189,8 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // Handle ranged attacks
-        if (enemy.type === 'ranged' && 
-            distance <= enemy.optimalRange * 1.2 && 
+        if (enemy.attackDistance === 'range' && 
+            distance <= enemy.attackRange * 1.2 && 
             this.time.now > enemy.lastAttackTime + (1000 / enemy.attackRate)) {
             
             const angle = Phaser.Math.Angle.Between(
@@ -217,7 +217,7 @@ export default class GameScene extends Phaser.Scene {
     onEnemyHit(hitbox, enemy) {
         enemy.health -= playerConfig.baseDamage;
         if (enemy.health <= 0) {
-            this.addExp(enemyConfig.expRewardMultiplier);
+            this.addExp(enemy.config.expReward);
             enemy.destroy();
         }
     }
@@ -226,12 +226,12 @@ export default class GameScene extends Phaser.Scene {
         enemy.health -= playerConfig.baseDamage;
         projectile.destroy();
         if (enemy.health <= 0) {
-            this.addExp(enemyConfig.expRewardMultiplier);
+            this.addExp(enemy.config.expReward);
             enemy.destroy();
         }
     }
 
-    onPlayerHit(player, projectile) {
+    onPlayerGotHit(player, projectile) {
         player.health -= projectile.damage;
         projectile.destroy();
         
