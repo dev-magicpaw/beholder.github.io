@@ -253,4 +253,32 @@ export default class UIScene extends Phaser.Scene {
         // Update FPS
         this.fpsText.setText(`FPS: ${Math.floor(this.game.loop.actualFps)}`);
     }
+
+    isPointerOverUI(pointer) {
+        // Check if pointer is over pause button
+        if (this.pauseButton && this.pauseButton.getBounds().contains(pointer.x, pointer.y)) {
+            return true;
+        }
+        
+        // Check if pointer is over pause menu elements
+        if (this.isPaused) {
+            if (this.pauseBg && this.pauseBg.getBounds().contains(pointer.x, pointer.y)) {
+                return true;
+            }
+            if (this.resumeButton && this.resumeButton.getBounds().contains(pointer.x, pointer.y)) {
+                return true;
+            }
+        }
+        
+        // Check if pointer is over upgrade choices
+        if (this.upgradeButtons) {
+            for (const button of this.upgradeButtons) {
+                if (button.getBounds().contains(pointer.x, pointer.y)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
 } 

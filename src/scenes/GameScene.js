@@ -342,13 +342,17 @@ export default class GameScene extends Phaser.Scene {
         
         // Set up joystick events
         this.input.on('pointerdown', (pointer) => {
-            if (pointer.y > this.game.config.height - 200) { // Only activate in bottom area
-                this.joystick.isActive = true;
-                this.joystick.base.x = pointer.x;
-                this.joystick.base.y = pointer.y;
-                this.joystick.handle.x = pointer.x;
-                this.joystick.handle.y = pointer.y;
+            // Check if we clicked on a UI element
+            const uiScene = this.scene.get('UIScene');
+            if (uiScene && uiScene.isPointerOverUI(pointer)) {
+                return;
             }
+            
+            this.joystick.isActive = true;
+            this.joystick.base.x = pointer.x;
+            this.joystick.base.y = pointer.y;
+            this.joystick.handle.x = pointer.x;
+            this.joystick.handle.y = pointer.y;
         });
         
         this.input.on('pointermove', (pointer) => {
