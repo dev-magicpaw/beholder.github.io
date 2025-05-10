@@ -1,6 +1,7 @@
 export default class UIScene extends Phaser.Scene {
     constructor() {
         super('UIScene');
+        this.isPaused = false;
     }
 
     init(data) {
@@ -11,6 +12,9 @@ export default class UIScene extends Phaser.Scene {
     create() {
         // Create HUD
         this.createHUD();
+
+        // Create pause button
+        this.createPauseButton();
 
         // If we have upgrade choices, show them
         if (this.choices) {
@@ -44,6 +48,97 @@ export default class UIScene extends Phaser.Scene {
             font: '16px monospace',
             fill: '#ffffff'
         });
+    }
+
+    createPauseButton() {
+        // Create pause button in top-right corner
+        const buttonSize = 40;
+        const padding = 10;
+        
+        this.pauseButton = this.add.rectangle(
+            this.game.config.width - buttonSize - padding,
+            buttonSize + padding,
+            buttonSize,
+            buttonSize,
+            0x444444
+        );
+
+        this.pauseIcon = this.add.text(
+            this.pauseButton.x,
+            this.pauseButton.y,
+            '⏸',
+            {
+                font: '24px monospace',
+                fill: '#ffffff'
+            }
+        ).setOrigin(0.5);
+
+        this.pauseButton.setInteractive();
+        this.pauseButton.on('pointerdown', () => this.togglePause());
+    }
+
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        
+        if (this.isPaused) {
+            this.scene.pause('GameScene');
+            this.showPauseMenu();
+        } else {
+            this.scene.resume('GameScene');
+            this.hidePauseMenu();
+        }
+    }
+
+    showPauseMenu() {
+        // Create semi-transparent background
+        this.pauseBg = this.add.rectangle(
+            this.game.config.width / 2,
+            this.game.config.height / 2,
+            this.game.config.width,
+            this.game.config.height,
+            0x000000,
+            0.8
+        );
+
+        // Create pause menu text
+        this.pauseText = this.add.text(
+            this.game.config.width / 2,
+            this.game.config.height / 2 - 50,
+            'PAUSED',
+            {
+                font: '48px monospace',
+                fill: '#ffffff'
+            }
+        ).setOrigin(0.5);
+
+        // Create resume button
+        this.resumeButton = this.add.rectangle(
+            this.game.config.width / 2,
+            this.game.config.height / 2 + 50,
+            200,
+            50,
+            0x444444
+        );
+
+        this.resumeText = this.add.text(
+            this.resumeButton.x,
+            this.resumeButton.y,
+            'Resume',
+            {
+                font: '24px monospace',
+                fill: '#ffffff'
+            }
+        ).setOrigin(0.5);
+
+        this.resumeButton.setInteractive();
+        this.resumeButton.on('pointerdown', () => this.togglePause());
+    }
+
+    hidePauseMenu() {
+        if (this.pauseBg) this.pauseBg.destroy();
+        if (this.pauseText) this.pauseText.destroy();
+        if (this.resumeButton) this.resumeButton.destroy();
+        if (this.resumeText) this.resumeText.destroy();
     }
 
     showUpgradeChoices() {

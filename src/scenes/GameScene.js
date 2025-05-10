@@ -28,7 +28,10 @@ export default class GameScene extends Phaser.Scene {
         this.player.speed = playerConfig.speed;
         this.player.attacks = [...playerConfig.attacks];
 
+        // Create melee hitbox with physics
         this.meleeHitbox = this.add.circle(0, 0, playerConfig.meleeRange, 0xff0000, 0.3);
+        this.physics.add.existing(this.meleeHitbox, false); // Add physics body
+        this.meleeHitbox.body.setCircle(playerConfig.meleeRange);
         this.meleeHitbox.setVisible(false);
 
         // Set up collisions
@@ -110,7 +113,11 @@ export default class GameScene extends Phaser.Scene {
     handleAttacks() {
         if (this.player.attacks.includes('melee')) {
             this.meleeHitbox.setVisible(true);
-            this.time.delayedCall(100, () => this.meleeHitbox.setVisible(false));
+            this.meleeHitbox.body.enable = true; // Enable physics body
+            this.time.delayedCall(100, () => {
+                this.meleeHitbox.setVisible(false);
+                this.meleeHitbox.body.enable = false; // Disable physics body
+            });
         }
 
         if (this.player.attacks.includes('ranged')) {
@@ -218,18 +225,8 @@ export default class GameScene extends Phaser.Scene {
         console.log(`Enemy hit by ${playerConfig.baseDamage} damage. Enemy health: ${enemy.health}`);
         
         if (enemy.health <= 0) {
-            if (enemy.anims && enemy.anims.play) {
-                enemy.anims.play('hurt');
-                // Destroy after animation completes
-                enemy.once('animationcomplete', () => {
-                    this.addExp(enemy.config.expReward);
-                    enemy.destroy();
-                });
-            } else {
-                // If no animation, destroy immediately
-                this.addExp(enemy.config.expReward);
-                enemy.destroy();
-            }
+            this.addExp(enemy.config.expReward);
+            enemy.destroy();
         }
     }
 
@@ -238,18 +235,8 @@ export default class GameScene extends Phaser.Scene {
         projectile.destroy();
         
         if (enemy.health <= 0) {
-            if (enemy.anims && enemy.anims.play) {
-                enemy.anims.play('hurt');
-                // Destroy after animation completes
-                enemy.once('animationcomplete', () => {
-                    this.addExp(enemy.config.expReward);
-                    enemy.destroy();
-                });
-            } else {
-                // If no animation, destroy immediately
-                this.addExp(enemy.config.expReward);
-                enemy.destroy();
-            }
+            this.addExp(enemy.config.expReward);
+            enemy.destroy();
         }
     }
 
