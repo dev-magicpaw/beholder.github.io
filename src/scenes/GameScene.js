@@ -240,9 +240,9 @@ export default class GameScene extends Phaser.Scene {
         enemy.attackCooldown_ms = enemyConfig.attackCooldown_ms;
         enemy.lastAttackTime = 0;
         enemy.attackDistance = enemyConfig.attackDistance;
+        enemy.attackRange = enemyConfig.attackRange;
 
         if (enemyConfig.attackDistance === 'range') {
-            enemy.attackRange = enemyConfig.attackRange;
             enemy.projectileSpeed = enemyConfig.projectileSpeed;
         }
     }
@@ -277,7 +277,7 @@ export default class GameScene extends Phaser.Scene {
 
         // Handle attacks
         if (this.time.now > enemy.lastAttackTime + enemy.attackCooldown_ms) {
-            if (enemy.attackDistance === 'melee' && distance <= 50) {
+            if (enemy.attackDistance === 'melee' && distance <= enemy.attackRange) {
                 // Melee attack
                 this.player.health -= enemy.damage;
                 if (this.player.health <= 0) {

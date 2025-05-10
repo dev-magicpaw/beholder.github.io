@@ -12,6 +12,7 @@ export default {
             damage: 5,
             attackCooldown_ms: 1000,
             attackDistance: 'melee',
+            attackRange: 40,
         },
         {
             config_id: 'enemy_orc',
@@ -24,7 +25,8 @@ export default {
             hitPoints: 5,
             damage: 20,
             attackCooldown_ms: 4000,
-            attackDistance: 'melee'
+            attackDistance: 'melee',
+            attackRange: 40
         },
         {
             config_id: 'enemy_archer',
