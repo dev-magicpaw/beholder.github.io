@@ -143,12 +143,35 @@ export default class GameScene extends Phaser.Scene {
                         return distance <= attack.range;
                     });
 
-                    // Sort by distance and take only target_count enemies
-                    nearbyEnemies.sort((a, b) => {
-                        const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
-                        const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
-                        return distA - distB;
-                    }).slice(0, attack.target_count).forEach(enemy => {
+                    // Sort enemies based on target_type
+                    let targetEnemies;
+                    switch (attack.target_type) {
+                        case 'closest':
+                            targetEnemies = nearbyEnemies.sort((a, b) => {
+                                const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
+                                const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
+                                return distA - distB;
+                            });
+                            break;
+                        case 'furthest':
+                            targetEnemies = nearbyEnemies.sort((a, b) => {
+                                const distA = Phaser.Math.Distance.Between(this.player.x, this.player.y, a.x, a.y);
+                                const distB = Phaser.Math.Distance.Between(this.player.x, this.player.y, b.x, b.y);
+                                return distB - distA;
+                            });
+                            break;
+                        case 'lowest_health':
+                            targetEnemies = nearbyEnemies.sort((a, b) => a.health - b.health);
+                            break;
+                        case 'highest_health':
+                            targetEnemies = nearbyEnemies.sort((a, b) => b.health - a.health);
+                            break;
+                        default:
+                            targetEnemies = nearbyEnemies;
+                    }
+
+                    // Take only target_count enemies
+                    targetEnemies.slice(0, attack.target_count).forEach(enemy => {
                         // Spawn attack sprite directly on enemy
                         const attackSprite = this.add.sprite(enemy.x, enemy.y, attack.projectile_sprite);
                         attackSprite.setScale(attack.projectile_scale);
