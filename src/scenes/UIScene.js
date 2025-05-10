@@ -141,9 +141,16 @@ export default class UIScene extends Phaser.Scene {
         if (this.resumeText) this.resumeText.destroy();
     }
 
-    showUpgradeChoices() {
+    showUpgradeChoices(level, choices) {
+        // Clear any existing upgrade UI
+        this.clearUpgradeUI();
+
+        // Store current choices
+        this.level = level;
+        this.choices = choices;
+
         // Create semi-transparent background
-        const bg = this.add.rectangle(
+        this.upgradeBg = this.add.rectangle(
             this.game.config.width / 2,
             this.game.config.height / 2,
             this.game.config.width,
@@ -158,6 +165,9 @@ export default class UIScene extends Phaser.Scene {
         const spacing = 20;
         const totalWidth = (buttonWidth + spacing) * this.choices.length - spacing;
         let startX = (this.game.config.width - totalWidth) / 2;
+
+        this.upgradeButtons = [];
+        this.upgradeTexts = [];
 
         this.choices.forEach((choice, index) => {
             const button = this.add.rectangle(
@@ -184,9 +194,22 @@ export default class UIScene extends Phaser.Scene {
             button.setInteractive();
             button.on('pointerdown', () => {
                 this.scene.get('GameScene').applyUpgrade(choice);
-                this.scene.stop();
+                this.clearUpgradeUI();
             });
+
+            this.upgradeButtons.push(button);
+            this.upgradeTexts.push(text);
         });
+    }
+
+    clearUpgradeUI() {
+        if (this.upgradeBg) this.upgradeBg.destroy();
+        if (this.upgradeButtons) {
+            this.upgradeButtons.forEach(button => button.destroy());
+            this.upgradeTexts.forEach(text => text.destroy());
+        }
+        this.upgradeButtons = [];
+        this.upgradeTexts = [];
     }
 
     formatUpgradeText(upgrade) {

@@ -260,13 +260,12 @@ export default class GameScene extends Phaser.Scene {
         this.level++;
         this.exp -= this.expToNextLevel;
         this.expToNextLevel = upgradeConfig.expFormula(this.level);
+        console.log(`XP needed for level ${this.level + 1}: ${this.expToNextLevel}`);
         
-        // Pause game and show upgrade choices
+        // Pause game and update existing UI scene
         this.scene.pause();
-        this.scene.launch('UIScene', { 
-            level: this.level,
-            choices: this.getUpgradeChoices()
-        });
+        const uiScene = this.scene.get('UIScene');
+        uiScene.showUpgradeChoices(this.level, this.getUpgradeChoices());
     }
 
     getUpgradeChoices() {
