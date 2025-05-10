@@ -3,16 +3,24 @@
   "version": "1.0.0",
   "description": "A 2D browser game where a beholder escapes its dungeon",
   "scripts": {
-    "start": "parcel src/index.html --open --port 1234",
-    "build": "parcel build src/index.html --public-url ./",
+    "start": "webpack serve --mode development --open",
+    "build": "webpack --mode production",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "phaser": "^3.70.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "babel-loader": "^9.1.3",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^6.10.0",
     "gh-pages": "^6.1.1",
-    "parcel": "^2.11.0",
-    "process": "^0.11.10"
+    "html-webpack-plugin": "^5.6.0",
+    "style-loader": "^3.3.4",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.2"
   }
 }
