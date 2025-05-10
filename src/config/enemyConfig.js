@@ -9,8 +9,8 @@ export default {
             expReward: 1,
             speed: 80,
             hitPoints: 2,
-            damage: 1,
-            attackRate: 1.2,
+            damage: 5,
+            attackCooldown_ms: 1000,
             attackDistance: 'melee',
         },
         {
@@ -22,8 +22,8 @@ export default {
             expReward: 5,
             speed: 60,
             hitPoints: 5,
-            damage: 2,
-            attackRate: 0.8,
+            damage: 20,
+            attackCooldown_ms: 4000,
             attackDistance: 'melee'
         },
         {
@@ -36,7 +36,7 @@ export default {
             speed: 80,
             hitPoints: 2,
             damage: 1,
-            attackRate: 1.5,
+            attackCooldown_ms: 1500,
             attackDistance: 'range',
             attackRange: 200,
             projectileSpeed: 200

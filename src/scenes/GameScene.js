@@ -237,7 +237,7 @@ export default class GameScene extends Phaser.Scene {
         enemy.health = enemyConfig.hitPoints;
         enemy.damage = enemyConfig.damage;
         enemy.speed = enemyConfig.speed;
-        enemy.attackRate = enemyConfig.attackRate;
+        enemy.attackCooldown_ms = enemyConfig.attackCooldown_ms;
         enemy.lastAttackTime = 0;
         enemy.attackDistance = enemyConfig.attackDistance;
 
@@ -275,30 +275,37 @@ export default class GameScene extends Phaser.Scene {
             );
         }
 
-        // Handle ranged attacks
-        if (enemy.attackDistance === 'range' && 
-            distance <= enemy.attackRange * 1.2 && 
-            this.time.now > enemy.lastAttackTime + (1000 / enemy.attackRate)) {
-            
-            const angle = Phaser.Math.Angle.Between(
-                enemy.x, enemy.y,
-                this.player.x, this.player.y
-            );
+        // Handle attacks
+        if (this.time.now > enemy.lastAttackTime + enemy.attackCooldown_ms) {
+            if (enemy.attackDistance === 'melee' && distance <= 50) {
+                // Melee attack
+                this.player.health -= enemy.damage;
+                if (this.player.health <= 0) {
+                    this.scene.start('GameOverScene');
+                }
+                enemy.lastAttackTime = this.time.now;
+            } else if (enemy.attackDistance === 'range' && distance <= enemy.attackRange * 1.2) {
+                // Ranged attack
+                const angle = Phaser.Math.Angle.Between(
+                    enemy.x, enemy.y,
+                    this.player.x, this.player.y
+                );
 
-            const projectile = this.enemyProjectiles.create(
-                enemy.x,
-                enemy.y,
-                'spheare'
-            );
-            projectile.setScale(0.1); // Scale down enemy projectiles
-            projectile.setVelocity(
-                Math.cos(angle) * enemy.projectileSpeed,
-                Math.sin(angle) * enemy.projectileSpeed
-            );
-            projectile.rotation = angle;
-            projectile.damage = enemy.damage;
+                const projectile = this.enemyProjectiles.create(
+                    enemy.x,
+                    enemy.y,
+                    'spheare'
+                );
+                projectile.setScale(0.1);
+                projectile.setVelocity(
+                    Math.cos(angle) * enemy.projectileSpeed,
+                    Math.sin(angle) * enemy.projectileSpeed
+                );
+                projectile.rotation = angle;
+                projectile.damage = enemy.damage;
 
-            enemy.lastAttackTime = this.time.now;
+                enemy.lastAttackTime = this.time.now;
+            }
         }
     }
 
