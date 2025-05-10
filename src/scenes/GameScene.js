@@ -1,3 +1,4 @@
+import { attacks } from '../config/attacksConfig';
 import enemyConfig from '../config/enemyConfig';
 import playerConfig from '../config/playerConfig';
 import upgradeConfig from '../config/upgradeConfig';
@@ -320,10 +321,11 @@ export default class GameScene extends Phaser.Scene {
             case 'regen':
                 playerConfig.regenRate += upgrade.baseValue;
                 break;
-            case 'newAttack':
-                const newAttack = Phaser.Math.RND.pick(upgrade.options);
-                if (!this.player.attacks.includes(newAttack)) {
-                    this.player.attacks.push(newAttack);
+            case 'single_ranged_attack':
+                const rangedAttack = attacks.find(attack => attack.name === upgrade.attackName);
+                if (rangedAttack && !this.player.attacks.some(attack => attack.name === rangedAttack.name)) {
+                    this.player.attacks.push(rangedAttack);
+                    this.lastAttackTimes[rangedAttack.name] = 0;
                 }
                 break;
             case 'expBoost':

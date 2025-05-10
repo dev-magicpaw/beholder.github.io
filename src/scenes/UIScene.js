@@ -220,8 +220,8 @@ export default class UIScene extends Phaser.Scene {
                 return `Max Health +${upgrade.baseValue}`;
             case 'regen':
                 return `Health Regen +${upgrade.baseValue}/s`;
-            case 'newAttack':
-                return `New Attack: ${upgrade.options.join(' or ')}`;
+            case 'single_ranged_attack':
+                return `New Attack: Ranged`;
             case 'expBoost':
                 return `EXP Gain +${upgrade.baseValue * 100}%`;
             default:
