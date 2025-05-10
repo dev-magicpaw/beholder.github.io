@@ -25,20 +25,20 @@ export default class UIScene extends Phaser.Scene {
     createHUD() {
         // Health bar
         this.healthBar = this.add.graphics();
-        this.healthText = this.add.text(10, 10, 'Health: 100/100', {
+        this.healthText = this.add.text(20, 22, 'Health: 100/100', {
             font: '16px monospace',
             fill: '#ffffff'
-        });
+        }).setOrigin(0);
 
         // EXP bar
         this.expBar = this.add.graphics();
-        this.expText = this.add.text(10, 40, 'EXP: 0/100', {
+        this.expText = this.add.text(10, 50, 'EXP: 0/100', {
             font: '16px monospace',
             fill: '#ffffff'
         });
 
         // Level text
-        this.levelText = this.add.text(10, 70, 'Level: 1', {
+        this.levelText = this.add.text(10, 80, 'Level: 1', {
             font: '16px monospace',
             fill: '#ffffff'
         });
@@ -237,14 +237,14 @@ export default class UIScene extends Phaser.Scene {
         const healthPercent = gameScene.player.health / gameScene.player.maxHealth;
         this.healthBar.clear();
         this.healthBar.fillStyle(0x00ff00, 1);
-        this.healthBar.fillRect(10, 30, 200 * healthPercent, 20);
+        this.healthBar.fillRect(10, 20, 200 * healthPercent, 20);
         this.healthText.setText(`Health: ${Math.floor(gameScene.player.health)}/${gameScene.player.maxHealth}`);
 
         // Update EXP bar
         const expPercent = gameScene.exp / gameScene.expToNextLevel;
         this.expBar.clear();
         this.expBar.fillStyle(0x0000ff, 1);
-        this.expBar.fillRect(10, 60, 200 * expPercent, 20);
+        this.expBar.fillRect(10, 50, 200 * expPercent, 20);
         this.expText.setText(`EXP: ${Math.floor(gameScene.exp)}/${Math.floor(gameScene.expToNextLevel)}`);
 
         // Update level text

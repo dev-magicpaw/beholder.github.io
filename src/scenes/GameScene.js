@@ -26,6 +26,7 @@ export default class GameScene extends Phaser.Scene {
         this.player.setScale(0.4);
         this.player.setCollideWorldBounds(true);
         this.player.health = playerConfig.health;
+        this.player.maxHealth = playerConfig.health;
         this.player.speed = playerConfig.speed;
         this.player.attacks = [...playerConfig.attacks];
 
@@ -301,6 +302,7 @@ export default class GameScene extends Phaser.Scene {
             case 'health':
                 playerConfig.health += upgrade.baseValue;
                 this.player.health += upgrade.baseValue;
+                this.player.maxHealth += upgrade.baseValue;
                 break;
             case 'regen':
                 playerConfig.regenRate += upgrade.baseValue;
