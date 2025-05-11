@@ -14,7 +14,20 @@ export default {
             attackRange: 40,
         },
         {
-            config_id: 'skeleton',
+            config_id: 'big_zombie',
+            sprite: 'zombie',
+            sprite_scale: 0.4,
+            sprite_tint: 0xffdddd,
+            expReward: 5,
+            speed: 70,
+            hitPoints: 10,
+            damage: 20,
+            attackCooldown_ms: 2000,
+            attackDistance: 'melee',
+            attackRange: 50,
+        },
+        {
+            config_id: 'zombie_archer',
             sprite: 'zombie_rope',
             sprite_scale: 0.25,
             sprite_tint: 0x000000,
@@ -26,7 +39,8 @@ export default {
             attackDistance: 'range',
             attackRange: 200,
             projectileSpeed: 200
-        }
+        },
+
     ],
     expRewardMultiplier: 1.0
 }; 

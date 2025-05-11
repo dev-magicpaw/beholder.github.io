@@ -6,13 +6,13 @@ export const levelConfig = {
                 enemies: [ { enemy: "zombie", count: 2 } ]
             },
             {
-                delay_seconds: 8,
+                delay_seconds: 6,
                 enemies: [ { enemy: "zombie", count: 4 } ]
             },
             {
-                delay_seconds: 15,
-                enemies: [ { enemy: "zombie", count: 6 },
-                           { enemy: "skeleton", count: 2 } ]
+                delay_seconds: 10,
+                enemies: [ { enemy: "zombie", count: 4 },
+                           { enemy: "big_zombie", count: 1 } ]
             }
         ]
     },
@@ -20,17 +20,21 @@ export const levelConfig = {
         waves: [
             {
                 delay_seconds: 1,
-                enemies: [ { enemy: "skeleton", count: 3 } ]
+                enemies: [ { enemy: "zombie", count: 4 } ]
             },
             {
-                delay_seconds: 10,
-                enemies: [ { enemy: "skeleton", count: 5 }, 
-                           { enemy: "zombie", count: 2 } ]
+                delay_seconds: 6,
+                enemies: [ { enemy: "zombie_archer", count: 2 } ]
+            },
+            {
+                delay_seconds: 12,
+                enemies: [ { enemy: "zombie_archer", count: 3 }, 
+                           { enemy: "zombie", count: 4 } ]
             },
             {
                 delay_seconds: 20,
-                enemies: [ { enemy: "skeleton", count: 7 }, 
-                           { enemy: "zombie", count: 4 } ]
+                enemies: [ { enemy: "zombie_archer", count: 4 }, 
+                           { enemy: "big_zombie", count: 2 } ]
             }
         ]
     }
