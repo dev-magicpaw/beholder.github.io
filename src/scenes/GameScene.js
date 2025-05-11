@@ -1,4 +1,5 @@
 import { attacks } from '../config/attacksConfig';
+import { bonusCircleConfig } from '../config/bonusCircleConfig';
 import enemyConfig from '../config/enemyConfig';
 import { levelConfig } from '../config/levelConfig';
 import playerConfig from '../config/playerConfig';
@@ -21,6 +22,12 @@ export default class GameScene extends Phaser.Scene {
         this.waveStartTime = 0;
         this.enemiesDefeated = 0;
         this.enemiesRemaining = 0;
+        
+        // Bonus XP circle properties
+        this.bonusCircle = null;
+        this.bonusCircleTimer = null;
+        this.playerInCircleTime = 0;
+        this.playerInCircle = false;
     }
 
     create() {
@@ -82,6 +89,11 @@ export default class GameScene extends Phaser.Scene {
         const wave = level.waves[this.currentWave];
         this.waveStartTime = this.time.now;
         this.enemiesRemaining = wave.enemies.reduce((total, enemyGroup) => total + enemyGroup.count, 0);
+
+        // Spawn bonus circle if not the last wave
+        if (this.currentWave < level.waves.length - 1) {
+            this.spawnBonusCircle();
+        }
 
         // Schedule wave start
         this.time.delayedCall(wave.delay_seconds * 1000, () => {
@@ -164,6 +176,36 @@ export default class GameScene extends Phaser.Scene {
         this.enemies.getChildren().forEach(enemy => {
             this.updateEnemy(enemy);
         });
+
+        // Check if player is in bonus circle
+        if (this.bonusCircle) {
+            const distance = Phaser.Math.Distance.Between(
+                this.player.x, this.player.y,
+                this.bonusCircle.x, this.bonusCircle.y
+            );
+
+            const wasInCircle = this.playerInCircle;
+            this.playerInCircle = distance <= this.bonusCircleRadius;
+
+            if (this.playerInCircle && !wasInCircle) {
+                // Just entered the circle
+                this.playerInCircleTime = time;
+                console.log('Player entered bonus circle');
+            } else if (!this.playerInCircle && wasInCircle) {
+                // Just exited the circle
+                this.playerInCircleTime = 0;
+                console.log('Player exited bonus circle');
+            }
+
+            // Check if player has been in circle long enough
+            if (this.playerInCircle && time - this.playerInCircleTime >= bonusCircleConfig.requiredTime_ms) {
+                this.addExp(bonusCircleConfig.xpAmount);
+                this.bonusCircle.destroy();
+                this.bonusCircle = null;
+                this.playerInCircle = false;
+                this.playerInCircleTime = 0;
+            }
+        }
 
         // Check if wave is complete
         if (this.enemiesRemaining === 0 && this.enemies.getChildren().length === 0) {
@@ -633,6 +675,36 @@ export default class GameScene extends Phaser.Scene {
             this.joystick.vector.y = 0;
             this.joystick.base.setVisible(false);
             this.joystick.handle.setVisible(false);
+        });
+    }
+
+    spawnBonusCircle() {
+        // Random position within game bounds
+        const x = Phaser.Math.Between(
+            bonusCircleConfig.spawnPadding, 
+            this.game.config.width - bonusCircleConfig.spawnPadding
+        );
+        const y = Phaser.Math.Between(
+            bonusCircleConfig.spawnPadding, 
+            this.game.config.height - bonusCircleConfig.spawnPadding
+        );
+
+        // Create circle sprite
+        this.bonusCircle = this.add.sprite(x, y, bonusCircleConfig.sprite);
+        this.bonusCircle.setScale(bonusCircleConfig.scale);
+        this.bonusCircle.setAlpha(bonusCircleConfig.alpha);
+
+        // Calculate the radius of the circle for collision detection
+        this.bonusCircleRadius = (this.bonusCircle.width * bonusCircleConfig.scale) / 2;
+
+        // Set timer to remove circle after duration
+        this.bonusCircleTimer = this.time.delayedCall(bonusCircleConfig.duration_ms, () => {
+            if (this.bonusCircle) {
+                this.bonusCircle.destroy();
+                this.bonusCircle = null;
+                this.playerInCircleTime = 0;
+                this.playerInCircle = false;
+            }
         });
     }
 } 
