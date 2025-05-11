@@ -1,5 +1,6 @@
 import { attacks } from '../config/attacksConfig';
 import enemyConfig from '../config/enemyConfig';
+import { levelConfig } from '../config/levelConfig';
 import playerConfig from '../config/playerConfig';
 import upgradeConfig from '../config/upgradeConfig';
 
@@ -15,6 +16,11 @@ export default class GameScene extends Phaser.Scene {
         this.expToNextLevel = upgradeConfig.expToFirstLevelUp;
         this.level = 1;
         this.isAttacking = false;
+        this.currentLevel = 'first';
+        this.currentWave = 0;
+        this.waveStartTime = 0;
+        this.enemiesDefeated = 0;
+        this.enemiesRemaining = 0;
     }
 
     create() {
@@ -56,18 +62,45 @@ export default class GameScene extends Phaser.Scene {
         // Create virtual joystick for mobile
         this.createVirtualJoystick();
         
-        // Start enemy spawning for each enemy type
-        enemyConfig.enemies.forEach(enemyType => {
-            this.time.addEvent({
-                delay: 1000 / enemyType.spawnRate,
-                callback: () => this.spawnEnemy(enemyType),
-                callbackScope: this,
-                loop: true
-            });
-        });
+        // Start the first wave
+        this.startNextWave();
 
         // Start UI scene
         this.scene.launch('UIScene');
+    }
+
+    startNextWave() {
+        const level = levelConfig[this.currentLevel];
+        if (!level || this.currentWave >= level.waves.length) {
+            // Level completed
+            this.handleLevelComplete();
+            return;
+        }
+
+        const wave = level.waves[this.currentWave];
+        this.waveStartTime = this.time.now;
+        this.enemiesRemaining = wave.enemies.reduce((total, enemyGroup) => total + enemyGroup.count, 0);
+
+        // Schedule wave start
+        this.time.delayedCall(wave.delay_seconds * 1000, () => {
+            wave.enemies.forEach(enemyGroup => {
+                const enemyType = enemyConfig.enemies.find(e => e.config_id === enemyGroup.enemy);
+                if (enemyType) {
+                    for (let i = 0; i < enemyGroup.count; i++) {
+                        this.spawnEnemy(enemyType);
+                    }
+                }
+            });
+        });
+    }
+
+    handleLevelComplete() {
+        // TODO: Implement level completion bonus
+        console.log('Level completed!');
+        // For now, just start the next level
+        this.currentLevel = 'second';
+        this.currentWave = 0;
+        this.startNextWave();
     }
 
     update(time) {
@@ -85,6 +118,12 @@ export default class GameScene extends Phaser.Scene {
         this.enemies.getChildren().forEach(enemy => {
             this.updateEnemy(enemy);
         });
+
+        // Check if wave is complete
+        if (this.enemiesRemaining === 0 && this.enemies.getChildren().length === 0) {
+            this.currentWave++;
+            this.startNextWave();
+        }
 
         // Regenerate health
         if (this.player.health < playerConfig.health) {
@@ -287,11 +326,11 @@ export default class GameScene extends Phaser.Scene {
         }
 
         const enemy = this.enemies.create(x, y, enemyConfig.sprite);
-        enemy.setScale(enemyConfig.sprite_scale || 0.3); // Use sprite_scale from config
+        enemy.setScale(enemyConfig.sprite_scale || 0.3);
         if (enemyConfig.sprite_tint) {
-            enemy.setTint(enemyConfig.sprite_tint); // Apply tint if specified
+            enemy.setTint(enemyConfig.sprite_tint);
         }
-        enemy.setCollideWorldBounds(true); // Prevent enemies from walking off screen
+        enemy.setCollideWorldBounds(true);
         enemy.config = enemyConfig;
         enemy.health = enemyConfig.hitPoints;
         enemy.damage = enemyConfig.damage;
@@ -379,6 +418,8 @@ export default class GameScene extends Phaser.Scene {
 
     addExp(amount) {
         this.exp += amount * playerConfig.expBoost;
+        this.enemiesDefeated++;
+        this.enemiesRemaining--;
         
         if (this.exp >= this.expToNextLevel) {
             this.levelUp();
