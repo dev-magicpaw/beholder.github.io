@@ -17,7 +17,7 @@ export default {
             config_id: 'big_zombie',
             sprite: 'zombie',
             sprite_scale: 0.4,
-            sprite_tint: 0xffdddd,
+            sprite_tint: 0xffbbbb,
             expReward: 5,
             speed: 70,
             hitPoints: 10,

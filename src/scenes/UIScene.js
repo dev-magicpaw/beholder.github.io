@@ -160,36 +160,51 @@ export default class UIScene extends Phaser.Scene {
         );
 
         // Create upgrade choice buttons
-        const buttonWidth = 200;
-        const buttonHeight = 100;
+        const buttonWidth = this.game.config.width * 0.9; // TODO put 0.9 into a const
+        const buttonHeight = 120;
         const spacing = 20;
-        const totalWidth = (buttonWidth + spacing) * this.choices.length - spacing;
-        let startX = (this.game.config.width - totalWidth) / 2;
+        const totalHeight = (buttonHeight + spacing) * this.choices.length - spacing;
+        let startY = (this.game.config.height - totalHeight) / 2;
 
         this.upgradeButtons = [];
         this.upgradeTexts = [];
+        this.upgradeImages = [];
 
         this.choices.forEach((choice, index) => {
             const button = this.add.rectangle(
-                startX + index * (buttonWidth + spacing) + buttonWidth / 2,
-                this.game.config.height / 2,
+                this.game.config.width / 2,
+                startY + index * (buttonHeight + spacing) + buttonHeight / 2,
                 buttonWidth,
                 buttonHeight,
                 0x444444
             );
 
+            // Add upgrade image on the left
+            const imageSize = buttonHeight * 0.8;
+            const imageX = button.x - buttonWidth / 2 + imageSize / 2 + 20;
+            const image = this.add.rectangle(
+                imageX,
+                button.y,
+                imageSize,
+                imageSize,
+                this.getUpgradeColor(choice.type)
+            );
+            this.upgradeImages.push(image);
+
+            // Add upgrade text on the right
+            const textX = imageX + imageSize / 2 + 20;
             const text = this.add.text(
-                button.x,
+                textX,
                 button.y,
                 this.formatUpgradeText(choice),
                 {
-                    font: '16px monospace',
+                    font: '24px monospace',
                     fill: '#ffffff',
-                    align: 'center',
-                    wordWrap: { width: buttonWidth - 20 }
+                    align: 'left',
+                    wordWrap: { width: buttonWidth - imageSize - 60 }
                 }
             );
-            text.setOrigin(0.5);
+            text.setOrigin(0, 0.5);
 
             button.setInteractive();
             button.on('pointerdown', () => {
@@ -202,14 +217,33 @@ export default class UIScene extends Phaser.Scene {
         });
     }
 
+    getUpgradeColor(type) {
+        switch (type) {
+            case 'speed':
+                return 0x00ff00; // Green
+            case 'health':
+                return 0xff0000; // Red
+            case 'regen':
+                return 0x0000ff; // Blue
+            case 'single_ranged_attack':
+                return 0xffff00; // Yellow
+            case 'expBoost':
+                return 0xff00ff; // Purple
+            default:
+                return 0xffffff; // White
+        }
+    }
+
     clearUpgradeUI() {
         if (this.upgradeBg) this.upgradeBg.destroy();
         if (this.upgradeButtons) {
             this.upgradeButtons.forEach(button => button.destroy());
             this.upgradeTexts.forEach(text => text.destroy());
+            this.upgradeImages.forEach(image => image.destroy());
         }
         this.upgradeButtons = [];
         this.upgradeTexts = [];
+        this.upgradeImages = [];
     }
 
     formatUpgradeText(upgrade) {
