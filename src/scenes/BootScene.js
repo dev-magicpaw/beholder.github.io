@@ -44,6 +44,9 @@ export default class BootScene extends Phaser.Scene {
         this.load.image('zombie_rope', 'assets/sprites/toon-characters/Zombie/PNG/Poses HD/character_zombie_rope.png');
         this.load.image('robot', 'assets/sprites/toon-characters/Robot/PNG/Poses HD/character_robot_side.png');
         this.load.image('main_character', 'assets/sprites/toon-characters/Male adventurer/PNG/Poses HD/character_maleAdventurer_side.png');
+
+
+        this.load.image('dark_panel', 'assets/sprites/ui-pack-adventure/PNG/Double/panel_grey_dark.png');
     }
 
     create() {

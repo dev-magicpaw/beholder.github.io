@@ -141,7 +141,7 @@ export default class UIScene extends Phaser.Scene {
         if (this.resumeText) this.resumeText.destroy();
     }
 
-    showUpgradeChoices(level, choices) {
+    showUpgradeChoices(level, choices, isVictoryUpgrade = false) {
         // Clear any existing upgrade UI
         this.clearUpgradeUI();
 
@@ -159,12 +159,29 @@ export default class UIScene extends Phaser.Scene {
             0.8
         );
 
+        // Add victory message if this is a victory upgrade
+        if (isVictoryUpgrade) {
+            this.victoryText = this.add.text(
+                this.game.config.width / 2,
+                this.game.config.height / 4,
+                'Level Complete!\nChoose a Victory Upgrade:',
+                {
+                    font: '32px monospace',
+                    fill: '#ffff00',
+                    align: 'center'
+                }
+            ).setOrigin(0.5);
+        }
+
         // Create upgrade choice buttons
-        const buttonWidth = this.game.config.width * 0.9; // TODO put 0.9 into a const
+        const buttonWidth = this.game.config.width * 0.9;
         const buttonHeight = 120;
         const spacing = 20;
         const totalHeight = (buttonHeight + spacing) * this.choices.length - spacing;
         let startY = (this.game.config.height - totalHeight) / 2;
+        if (isVictoryUpgrade) {
+            startY += 100; // Move buttons down to make room for victory message
+        }
 
         this.upgradeButtons = [];
         this.upgradeTexts = [];
@@ -218,24 +235,11 @@ export default class UIScene extends Phaser.Scene {
     }
 
     getUpgradeColor(type) {
-        switch (type) {
-            case 'speed':
-                return 0x00ff00; // Green
-            case 'health':
-                return 0xff0000; // Red
-            case 'regen':
-                return 0x0000ff; // Blue
-            case 'single_ranged_attack':
-                return 0xffff00; // Yellow
-            case 'expBoost':
-                return 0xff00ff; // Purple
-            default:
-                return 0xffffff; // White
-        }
     }
 
     clearUpgradeUI() {
         if (this.upgradeBg) this.upgradeBg.destroy();
+        if (this.victoryText) this.victoryText.destroy();
         if (this.upgradeButtons) {
             this.upgradeButtons.forEach(button => button.destroy());
             this.upgradeTexts.forEach(text => text.destroy());
@@ -244,6 +248,7 @@ export default class UIScene extends Phaser.Scene {
         this.upgradeButtons = [];
         this.upgradeTexts = [];
         this.upgradeImages = [];
+        this.victoryText = null;
     }
 
     formatUpgradeText(upgrade) {
@@ -254,10 +259,20 @@ export default class UIScene extends Phaser.Scene {
                 return `Max Health +${upgrade.baseValue}`;
             case 'regen':
                 return `Health Regen +${upgrade.baseValue}/s`;
-            case 'single_ranged_attack':
-                return `New Attack: Ranged`;
             case 'expBoost':
                 return `EXP Gain +${upgrade.baseValue * 100}%`;
+            case 'attack_upgrade':
+                const gameScene = this.scene.get('GameScene');
+                const attack = gameScene.player.attacks.find(a => a.name === upgrade.attackName);
+                if (attack) {
+                    const nextLevel = attack.levels[upgrade.nextLevel];
+                    return `Upgrade ${attack.name.replace('_', ' ')} to Level ${upgrade.nextLevel + 1}:\n`;
+                }
+                return 'Attack Upgrade';
+            case 'new_attack':
+                const attackName = upgrade.attack.name.replace('_', ' ');
+                const firstLevel = upgrade.attack.levels[0];
+                return `Unlock New Attack: ${attackName}\nDamage: ${firstLevel.damage}\nRange: ${firstLevel.range}\nCooldown: ${firstLevel.cooldown_ms}ms`;
             default:
                 return upgrade.type;
         }

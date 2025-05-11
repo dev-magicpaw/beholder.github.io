@@ -97,12 +97,56 @@ export default class GameScene extends Phaser.Scene {
     }
 
     handleLevelComplete() {
-        // TODO: Implement level completion bonus
-        console.log('Level completed!');
-        // For now, just start the next level
+        // Show victory upgrade choices
+        this.scene.pause();
+        const uiScene = this.scene.get('UIScene');
+        uiScene.showUpgradeChoices(this.level, this.getVictoryUpgradeChoices(), true);
+
+        // Start next level after upgrade is chosen
         this.currentLevel = 'second';
         this.currentWave = 0;
-        this.startNextWave();
+    }
+
+    getVictoryUpgradeChoices() {
+        const choices = [];
+        const availableUpgrades = [...upgradeConfig.baseChoices];
+        
+        // First, add new attack options that the player doesn't have yet
+        const playerAttackNames = this.player.attacks.map(a => a.name);
+        const newAttacks = attacks.filter(attack => !playerAttackNames.includes(attack.name));
+        
+        if (newAttacks.length > 0) {
+            // Add new attack options
+            newAttacks.forEach(attack => {
+                choices.push({
+                    type: 'new_attack',
+                    attack: {
+                        ...attack,
+                        currentLevel: 0
+                    }
+                });
+            });
+        } else {
+            // If no new attacks available, add regular attack upgrades
+            this.player.attacks.forEach(attack => {
+                if (attack.currentLevel < attack.levels.length - 1) {
+                    availableUpgrades.push({
+                        type: 'attack_upgrade',
+                        attackName: attack.name,
+                        nextLevel: attack.currentLevel + 1
+                    });
+                }
+            });
+        }
+        
+        // If we have less than choiceCount choices, add regular upgrades
+        while (choices.length < upgradeConfig.choiceCount && availableUpgrades.length > 0) {
+            const index = Phaser.Math.Between(0, availableUpgrades.length - 1);
+            choices.push(availableUpgrades[index]);
+            availableUpgrades.splice(index, 1);
+        }
+        
+        return choices;
     }
 
     update(time) {
@@ -445,7 +489,19 @@ export default class GameScene extends Phaser.Scene {
         const choices = [];
         const availableUpgrades = [...upgradeConfig.baseChoices];
         
+        // Add attack upgrade options for existing attacks that haven't reached max level
+        this.player.attacks.forEach(attack => {
+            if (attack.currentLevel < attack.levels.length - 1) {
+                availableUpgrades.push({
+                    type: 'attack_upgrade',
+                    attackName: attack.name,
+                    nextLevel: attack.currentLevel + 1
+                });
+            }
+        });
+        
         for (let i = 0; i < upgradeConfig.choiceCount; i++) {
+            if (availableUpgrades.length === 0) break;
             const index = Phaser.Math.Between(0, availableUpgrades.length - 1);
             choices.push(availableUpgrades[index]);
             availableUpgrades.splice(index, 1);
@@ -467,22 +523,36 @@ export default class GameScene extends Phaser.Scene {
             case 'regen':
                 playerConfig.regenRate += upgrade.baseValue;
                 break;
-            case 'single_ranged_attack':
-                const rangedAttack = attacks.find(attack => attack.name === upgrade.attackName);
-                if (rangedAttack && !this.player.attacks.some(attack => attack.name === rangedAttack.name)) {
-                    this.player.attacks.push({
-                        ...rangedAttack,
-                        currentLevel: 0
-                    });
-                    this.lastAttackTimes[rangedAttack.name] = 0;
-                }
-                break;
             case 'expBoost':
                 playerConfig.expBoost += upgrade.baseValue;
+                break;
+            case 'attack_upgrade':
+                const attack = this.player.attacks.find(a => a.name === upgrade.attackName);
+                if (attack) {
+                    // Update the entire attack with the next level's properties
+                    const nextLevel = attack.levels[upgrade.nextLevel];
+                    attack.currentLevel = upgrade.nextLevel;
+                    
+                    // Update melee hitbox if it's a melee attack
+                    if (attack.type === 'melee' && attack.name === this.player.attacks[0].name) {
+                        this.meleeHitbox.setRadius(nextLevel.range);
+                        this.meleeHitbox.body.setCircle(nextLevel.range);
+                    }
+                }
+                break;
+            case 'new_attack':
+                // Add the new attack to player's attacks
+                this.player.attacks.push(upgrade.attack);
+                // Initialize last attack time for the new attack
+                this.lastAttackTimes[upgrade.attack.name] = 0;
                 break;
         }
         
         this.scene.resume();
+        // If this was a victory upgrade, start the next wave
+        if (this.currentWave === 0) {
+            this.startNextWave();
+        }
     }
 
     createVirtualJoystick() {
