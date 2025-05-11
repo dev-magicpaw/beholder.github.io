@@ -48,9 +48,11 @@ export default class GameScene extends Phaser.Scene {
         });
 
         // Create melee hitbox with physics
-        this.meleeHitbox = this.add.circle(0, 0, this.player.attacks[0].range, 0xff0000, 0.3);
+        const firstAttack = this.player.attacks[0];
+        const firstLevel = firstAttack.levels[firstAttack.currentLevel];
+        this.meleeHitbox = this.add.circle(0, 0, firstLevel.range, 0xff0000, 0.3);
         this.physics.add.existing(this.meleeHitbox, false); // Add physics body
-        this.meleeHitbox.body.setCircle(this.player.attacks[0].range);
+        this.meleeHitbox.body.setCircle(firstLevel.range);
         this.meleeHitbox.setVisible(false);
 
         // Set up collisions
@@ -169,8 +171,9 @@ export default class GameScene extends Phaser.Scene {
 
     handleAttacks(time) {
         this.player.attacks.forEach(attack => {
+            const currentLevel = attack.levels[attack.currentLevel];
             // Check if attack is off cooldown
-            if (time > this.lastAttackTimes[attack.name] + attack.cooldown_ms) {
+            if (time > this.lastAttackTimes[attack.name] + currentLevel.cooldown_ms) {
                 if (attack.type === 'melee') {
                     // Get all enemies within range
                     const nearbyEnemies = this.enemies.getChildren().filter(enemy => {
@@ -179,7 +182,7 @@ export default class GameScene extends Phaser.Scene {
                             enemy.x, enemy.y
                         );
                         
-                        return distance <= attack.range;
+                        return distance <= currentLevel.range;
                     });
 
                     // Sort enemies based on target_type
@@ -210,25 +213,25 @@ export default class GameScene extends Phaser.Scene {
                     }
 
                     // Take only target_count enemies
-                    targetEnemies.slice(0, attack.target_count).forEach(enemy => {
+                    targetEnemies.slice(0, currentLevel.target_count).forEach(enemy => {
                         // Spawn attack sprite directly on enemy
-                        const attackSprite = this.add.sprite(enemy.x, enemy.y, attack.projectile_sprite);
-                        attackSprite.setScale(attack.projectile_scale);
-                        attackSprite.setTint(attack.projectile_tint);
-                        attackSprite.setAlpha(attack.projectile_alpha);
+                        const attackSprite = this.add.sprite(enemy.x, enemy.y, currentLevel.projectile_sprite);
+                        attackSprite.setScale(currentLevel.projectile_scale);
+                        attackSprite.setTint(currentLevel.projectile_tint);
+                        attackSprite.setAlpha(currentLevel.projectile_alpha);
                         
                         // Add a fade out and destroy animation
                         this.tweens.add({
                             targets: attackSprite,
                             alpha: 0,
-                            duration: attack.projectile_duration_ms,
+                            duration: currentLevel.projectile_duration_ms,
                             onComplete: () => {
                                 attackSprite.destroy();
                             }
                         });
 
                         // Apply damage directly
-                        enemy.health -= attack.damage;
+                        enemy.health -= currentLevel.damage;
                         if (enemy.health <= 0) {
                             this.addExp(enemy.config.expReward);
                             enemy.destroy();
@@ -243,7 +246,7 @@ export default class GameScene extends Phaser.Scene {
                             this.player.x, this.player.y,
                             enemy.x, enemy.y
                         );
-                        return distance <= attack.range;
+                        return distance <= currentLevel.range;
                     });
 
                     // Sort enemies based on target_type
@@ -274,7 +277,7 @@ export default class GameScene extends Phaser.Scene {
                     }
 
                     // Take only target_count enemies
-                    targetEnemies.slice(0, attack.target_count).forEach(enemy => {
+                    targetEnemies.slice(0, currentLevel.target_count).forEach(enemy => {
                         const angle = Phaser.Math.Angle.Between(
                             this.player.x, this.player.y,
                             enemy.x, enemy.y
@@ -283,17 +286,17 @@ export default class GameScene extends Phaser.Scene {
                         const projectile = this.projectiles.create(
                             this.player.x,
                             this.player.y,
-                            attack.projectile_sprite
+                            currentLevel.projectile_sprite
                         );
-                        projectile.setScale(attack.projectile_scale || 0.1);
-                        projectile.setTint(attack.projectile_tint || 0xffffff);
-                        projectile.setAlpha(attack.projectile_alpha || 1);
+                        projectile.setScale(currentLevel.projectile_scale);
+                        projectile.setTint(currentLevel.projectile_tint);
+                        projectile.setAlpha(currentLevel.projectile_alpha);
                         projectile.setVelocity(
-                            Math.cos(angle) * attack.projectile_speed,
-                            Math.sin(angle) * attack.projectile_speed
+                            Math.cos(angle) * currentLevel.projectile_speed,
+                            Math.sin(angle) * currentLevel.projectile_speed
                         );
                         projectile.rotation = angle;
-                        projectile.damage = attack.damage;
+                        projectile.damage = currentLevel.damage;
 
                         // Add collision check for this projectile
                         this.physics.add.overlap(projectile, this.enemies, (proj, enemy) => {
@@ -467,7 +470,10 @@ export default class GameScene extends Phaser.Scene {
             case 'single_ranged_attack':
                 const rangedAttack = attacks.find(attack => attack.name === upgrade.attackName);
                 if (rangedAttack && !this.player.attacks.some(attack => attack.name === rangedAttack.name)) {
-                    this.player.attacks.push(rangedAttack);
+                    this.player.attacks.push({
+                        ...rangedAttack,
+                        currentLevel: 0
+                    });
                     this.lastAttackTimes[rangedAttack.name] = 0;
                 }
                 break;

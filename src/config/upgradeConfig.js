@@ -1,5 +1,5 @@
 export default {
-    tiers: 5,
+    tiers: 10,
     baseChoices: [
         { type: 'speed', baseValue: 20 },
         { type: 'health', baseValue: 10 },
